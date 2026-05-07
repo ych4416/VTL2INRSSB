@@ -1,0 +1,30 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+      "name": "Launch Edge",
+      "request": "launch",
+      "type": "msedge",
+      //"url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "runtimeArgs": [
+        "--allow-file-access-from-files"
+      ],
+      "smartStep": true,
+      "url": "${workspaceFolder}/index.html"
+    },
+    {
+      "name": "Launch Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "runtimeArgs": [
+        "--allow-file-access-from-files"
+      ],
+      //"url": "http://localhost:3000",
+      "url": "${workspaceFolder}/index.html"
+    }
+    ]
+}
