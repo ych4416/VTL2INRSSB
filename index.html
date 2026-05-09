@@ -86,6 +86,10 @@
         </ul>
         <!-- div id="tabs-2dgraphics"><svg id="svg2dgraphic"></svg></div -->
         <div id="tabs-main"><h1>CONSOLE</h1>
+            <div align="left">
+                <input type="checkbox" id="main-outtee" value="LOGGING" />
+                LOGGING
+            </div>
             <div align="right">
                 <input type="button" id="main-batch" value="BATCH"/>
                 <input type="button" id="main-esc" value="ESC"/>
@@ -220,9 +224,24 @@
     });
     $("#main-esc")[0].addEventListener('click',(e)=>{buffer+='\x1b'});
     $("#main-batch")[0].addEventListener('click',(e)=>{ExcBatch()});
+    $("#main-outtee")[0].addEventListener('change',(e)=>{
+            if(e.target.checked) { 
+                if(storage.files["stdout.txt"] === undefined || storage.files["stdout.txt"] === null){
+                    storage.files["stdout.txt"] = "";
+                    ResetMenu();
+                }
+                terminalUI.log = storage.files["stdout.txt"];
+            } else {
+                storage.files["stdout.txt"]+=terminalUI.log;
+                storage.files["stdout.txt"]+="\r\n----\r\n";
+                terminalUI.log = null;
+            }
+    })
     class TerminalUI {
+        log = null;
         constructor() { 
-            buffer = "" 
+            buffer = "";
+            this.log = null;
         };
         async getch(capitalize = false) {
             while (buffer === "") {
@@ -239,12 +258,16 @@
             while (ch !== '\r') {
                 if (ch === '\x7f') {
                     if (result.length > 0) {
-                        term.write('_');
+                        this.write('_');
                         result = result.substring(0, result.length - 1);
                     }
                 }
+                else if (ch === '\x1b') {
+                    this.writeln('^[');
+                    this.write(result);
+                }
                 else {
-                    term.write(ch);
+                    this.write(ch);
                     result = result + ch;
                 }
                 ch = await this.getch(capitalize);
@@ -253,10 +276,12 @@
             term.write('\r\n');
             return result;
         }
-        putchars(c) { term.write(c); };
-        writeln(s) { term.writeln(s); };
-        write(s) { term.write(s); }
+        putchars(c) { this.tee(c); term.write(c); };
+        writeln(s) { this.tee(s); term.writeln(s); };
+        write(s) { this.tee(s); term.write(s); }
         reset() { term.reset(); };
+
+        tee(c) { if(this.log !== null) this.log+=c;}
     }
 </script>
 <script>
@@ -760,20 +785,20 @@
         var newFileName = window.prompt("Enter New File Name.");
         if (newFileName === null) return;
         if (storage.files[newFileName] !== undefined) {
-            if (!windows.confirm("" + newFileName + " is already exists. Overwrite?")) return;
+            if (!window.confirm("" + newFileName + " is already exists. Overwrite?")) return;
         }
         storage.files[newFileName] = "";
         ResetMenu();
         SwitchFile(newFileName);
     }
 
-    function RenameFileeHandler(e) {
+    function RenameFileHandler(e) {
         var newFileName = window.prompt("Enter New File Name.");
         var curFileName = $("#inBrowsing")[0].options[$("#inBrowsing")[0].selectedIndex].value;
 
         if (newFileName === null) return;
         if (storage.files[newFileName] !== undefined) {
-            if (!windows.confirm("" + newFileName + " is already exists. Overwrite?")) return;
+            if (!window.confirm("" + newFileName + " is already exists. Overwrite?")) return;
         }
         storage.files[newFileName] = storage.files[curFileName];
         delete storage.files[curFileName];
@@ -806,11 +831,12 @@
         SwitchFile(storage.bootStrap);
     }
 
+
     function CopyFileHandler(e) {
         var newFileName = window.prompt("Enter New File Name to Copy.");
         if (newFileName === null) return;
         if (storage.files[newFileName] !== undefined) {
-            if (!windows.confirm("" + newFileName + " is already exists. Overwrite?")) return;
+            if (!window.confirm("" + newFileName + " is already exists. Overwrite?")) return;
         }
         storage.files[newFileName] = editor.getValue();
         ResetMenu();
