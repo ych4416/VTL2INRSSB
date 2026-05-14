@@ -1019,7 +1019,7 @@ DIGITSTABM      DC      1000000000
 DIGITSTABL      DC      1
                 DC      0
 DIGITSWORK      DS      11
-OPMSG           DC      'WELCOME VTL IN RSSB 0.03\r\n\0'
+OPMSG           DC      'WELCOME VTL IN RSSB 0.60\r\n\0'
 OPMSGA          DC      OPMSG
 OKMSG           DC      'OK\r\n\0'
 OKMSGA          DC      OKMSG
