@@ -5,6 +5,8 @@ See https://esolangs.org/wiki/RSSB in detail.
 
 This site provides an Emurator of RSSB (Reverse Substract Skip if Borrow) CPU which is one of OISC (One Instruction Set Computer), its IDE including monitor, assembler, debugger, and VTL-2 Programming Language interpreter in RSSB machine code as its middle-size application. VTL-2 in RSSB is 18000 machine words long. 
 
+Copilot AI pointed out in May 2026 that this VTL-2 interpreter may be one of the largest class application so far in RSSB.
+
 This Emulator implements in JavaScript with refer to https://github.com/electrodude/rssb (written in C).
 
 You can play programming RSSB machine on a playground site https://ych4416.github.io/VTL2INRSSB/ by writing its assembly language with macro definition feature. 
