@@ -50,7 +50,7 @@ STKUDF          MOVEM   STKTPA,STKPTR
                 MOVEM   UDFMSGA,PUTLINEA0
                 GOSUB   PUTLINE
                 JMP     MAIN1
-UDFMSGA         DC      OVFMSG
+UDFMSGA         DC      UDFMSG
 UDFMSG          DC      'ABORT - STACK UNDERFLOW...\r\n\0'
 ;
 ;
