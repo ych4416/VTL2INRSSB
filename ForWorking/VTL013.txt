@@ -61,7 +61,7 @@ PSV0DA          DS      1
 PSV0JA          DS      1
 ;
 ;
-POPV0           JCMP    STKPTR,STACK,STKOVF,STKOVF,POPV0A
+POPV0           JCMP    STKPTR,STACK,STKUDF,STKUDF,POPV0A
 POPV0A          PUSH    POV0DA,STKPTR
                 JPIND   POV0JA
 POV0DA          DS      1
