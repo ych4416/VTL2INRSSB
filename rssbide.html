@@ -122,6 +122,7 @@
             <h1>LOAD/SAVE</h1>
             <br><input type="text" id="saveTargetFile" value="init.txt" title="Save for" />
             <a id="saveFile">Dowinload</a>
+            <input type="button" id="ltocb" value="TOCLIPBD"/>
             <input type="button" id="saveToFile" value="SAVE TO FILE" />
             <br><input type="file" id="targetFile" accept=".txt" title="target" />
             <input type="button" id="loadFromFile" value="FromFile">
@@ -859,6 +860,10 @@
         navigator.clipboard.writeText(editor.getValue());
     }
     
+    function LToCBHandler(e) {
+        navigator.clipboard.writeText($("#outload").val());
+    }
+
     async function FromCBHandler(e) {
         try {
             if (!navigator.clipboard) {
@@ -918,6 +923,7 @@
         $("#fromcb")[0].addEventListener('click', async (e) => {FromCBHandler(e);});
         $("#toUpper")[0].addEventListener('click', (e) => {CapitalizeHandler(e);});
         $("#typeTab")[0].addEventListener('click', (e) => {TabHandler(e);});
+        $('#ltocb')[0].addEventListener('click', (e) => {LToCBHandler(e); });
         ResetMenu();
     })();
 </script>
