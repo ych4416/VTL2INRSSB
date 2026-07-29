@@ -15,12 +15,14 @@ TEST8           DC      -8
 TEST9           DC      -9
 TESTA           DC      -10
 IDXRW0          DS      1 
-GOSUB0          PUSH    GSB0RA,STKPTR
+GOSUB0          JCMP    STKPTR,STACK,STKOVF,STKOVF,GOSUB0A
+GOSUB0A         PUSH    GSB0RA,STKPTR
                 JPIND   GSB0JA
 GSB0RA          DS      1
 GSB0JA          DS      1
 ;
-RTN0            POP     RTN0A,STKPTR
+RTN0            JCMP    STKPTR,STKTOP,STKUDF,STKUDF,RTN00
+RTN00           POP     RTN0A,STKPTR
                 JPIND   RTN0A
 RTN0A           DS      1
 ;
@@ -37,7 +39,53 @@ RETURN          DEFMACRO
                 JMP     RTN0
                 ENDMACRO
 ;
+STKOVF          MOVEM   STKTPA,STKPTR
+                MOVEM   OVFMSGA,PUTLINEA0
+                GOSUB   PUTLINE
+                JMP     MAIN1
+OVFMSGA         DC      OVFMSG
+OVFMSG          DC      'ABORT - STACK OVERFLOW...\r\n\0'
 ;
+STKUDF          MOVEM   STKTPA,STKPTR
+                MOVEM   UDFMSGA,PUTLINEA0
+                GOSUB   PUTLINE
+                JMP     MAIN1
+UDFMSGA         DC      OVFMSG
+UDFMSG          DC      'ABORT - STACK UNDERFLOW...\r\n\0'
+;
+;
+PUSHV0          JCMP    STKPTR,STACK,STKOVF,STKOVF,PUSHV0A
+PUSHV0A         PUSH    PSV0DA,STKPTR
+                JPIND   PSV0JA
+PSV0DA          DS      1
+PSV0JA          DS      1
+;
+;
+POPV0           JCMP    STKPTR,STACK,STKOVF,STKOVF,POPV0A
+POPV0A          PUSH    POV0DA,STKPTR
+                JPIND   POV0JA
+POV0DA          DS      1
+POV0JA          DS      1
+;
+;
+PUSHV           DEFMACRO        DATA
+                MOVEM           DATA,PSV0DA
+                MOVEM           PUSHV8,PSV0JA
+                JMP             PUSHV0
+PUSHV8          DC              PUSHV9
+PUSHV9          RSSB            ACC
+                ENDMACRO
+;
+;
+POPV            DEFMACRO        DSTA
+                MOVEM           POPV8,POV0JA
+                JMP             POPV0
+POPV8           DC              POPV9
+POPV9           MOVEM           POV0DA,DSTA
+                ENDMACRO
+;
+;
+
 X10             DEFMACRO        TARGET
                 MOVEM           TARGET,W0
                 ACCM            TARGET,W0
@@ -191,7 +239,7 @@ MAINLP          SINDR   ZERO,VARSHARPP
                 SINDR   ZERO,VAREXCRP
                 GOSUB   SETLINE
                 MOVEM   SETLINER0,MAINW1
-                MOVEM   ZERO,MAINW0
+                CLEARM  MAINW0
                 JCMP    SETLINER0,ZERO,MAIN1,MAINLP,MAINL10
 MAINL10         PUSH    MAINW0,STKPTR    ; PUSH LINE #
                 PUSH    MAINW1,STKPTR    ; PUSH POINTER TO STATEMENT
