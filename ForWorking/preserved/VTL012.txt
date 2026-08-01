@@ -173,12 +173,11 @@ BMOVECW         DS      1
 ;
 ; 全体の初期化処理
 ;
-VTLINI          MOVEM   STKTPA,STKPTR          ; INIT STACK. GOSUB AVAILABLE NOW.
+VTLINI          MOVEM   STKTPA,STKPTR           ; INIT STACK. GOSUB AVAILABLE NOW.
                 MOVEM   PROGTOPP,PROGLASTP      ; CLAER PROGRAM
                 SINDR   PROGLASTP,VARAMPP
                 SINDR   MEMENDP,VARASTERP
                 MOVEM   OPMSGA,PUTLINEA0
-VTLNINS         MOVEM   PROGTOPP,TEST1
                 GOSUB   PUTLINE
                 JMP     MAIN1                   ; GET BACK TO MAINLINE
 ;
@@ -186,37 +185,45 @@ VTLNINS         MOVEM   PROGTOPP,TEST1
 ;
 MAIN            JMP     VTLINI                  ; INITILIZE. UNABLE TO USE GOSUB. SO JMP.
 MAIN1           MOVEM   OKMSGA,PUTLINEA0
-                GOSUB   PUTLINE
-MAINLP          SINDR   ZERO,VARSHARPP
+                GOSUB   PUTLINE                 ; OKメッセージの出力
+MAINLP          SINDR   ZERO,VARSHARPP          ; #=!=0
                 SINDR   ZERO,VAREXCRP
-                GOSUB   SETLINE
-                MOVEM   SETLINER0,MAINW1
-                MOVEM   ZERO,MAINW0
-                JCMP    SETLINER0,ZERO,MAIN1,MAINLP,MAINL10
-MAINL10         PUSH    MAINW0,STKPTR    ; PUSH LINE #
+                GOSUB   SETLINE                 ; 行の読み込みとプログラムステートメントの時の処理
+                MOVEM   SETLINER0,MAINW1        ; MAINW1 <- 実行するべきステートメント文字列の先頭
+                CLEARM  MAINW0                  ; SETLINE後に#に当たるW0をクリア
+                JCMP    SETLINER0,ZERO,MAIN1,MAINLP,MAINL10     ; 実行するべきステートメントがなければMAINLPへ戻る
+                ; L10 プログラムステートメントの処理ループ
+                ; ダイレクトステートメントの処理もこのループで処理する。
+MAINL10         PUSH    MAINW0,STKPTR    ; PUSH LINE #          ; 行の実行: ダイレクトステートメントの時は行番号を0として呼び出し
+                                                                ; そうでなければ指定行番号を設定
                 PUSH    MAINW1,STKPTR    ; PUSH POINTER TO STATEMENT
                 GOSUB   VTLEXEC
-                POP     MAINW3,STKPTR
-                JCMP    MAINW3,ZERO,MAINL20,MAINL30,MAINL20
+                POP     MAINW3,STKPTR                           ; 戻り値は、更新された#の値。更新されていなければ0が帰る。
+                JCMP    MAINW3,ZERO,MAINL20,MAINL30,MAINL20     ; 更新されていればL20, 更新されていなければL30
 MAINL20         MOVEM   MAINW0,MAINW2           ; # IS CHANGED BY PROGRAM
+                                                ; #と!を更新する
                 INC     MAINW2
                 SINDR   MAINW2,VAREXCRP         ; ! = THIS LINE #+1
-                MOVEM   MAINW3,MAINW0
-                JMP     MAINL40
+                MOVEM   MAINW3,MAINW0           ; #の値をW0にセット
+                JMP     MAINL40                 ; その行番号の行を探しにL40へ進む
 MAINL30         JCMP    MAINW0,ZERO,MAIN1,MAIN1,MAINL35
+                                                ; L30 : 現在の#の値が0の時は、プログラムの実行が終了と解釈、OKメッセージのエントリポイントに戻る。
+                                                ; #>0の時は次の行を探してMAINW1にセットしてループの先頭に戻る。
 MAINL35         MOVEM   MAINW1,NEXTLINEA0       ; # IS STAY
                 GOSUB   NEXTLINE                ; SEEK NEXT LINE
                 MOVEM   NEXTLINER0,MAINW1       ; POINTER TO HEAD OF STATENMENT OF NEXTLINE
                 MOVEM   NEXTLINER1,MAINW0       ; LINE # OF NEXTLINE
-                SINDR   MAINW0,VARSHARPP
-                JCMP    NEXTLINER0,PROGLASTP,MAINL10,MAIN1,MAIN1
+                SINDR   MAINW0,VARSHARPP        ; 見つかった行の行番号を#にセット
+                JCMP    NEXTLINER0,PROGLASTP,MAINL10,MAIN1,MAIN1　; 行探索の結果、最後まで検索しても行が見つからなかった場合には、プログラムの実行が終了したと解釈される。
 MAINL40         MOVEM   MAINW0,FINDLINEA0
-                GOSUB   FINDLINE
-                MOVEM   FINDLINER0,MAINW1
-                LINDR   FINDLINER0,MAINW0
-                SINDR   MAINW0,VARSHARPP
-                INC     MAINW1
-                JCMP    MAINW1,PROGLASTP,MAINL10,MAIN1,MAIN1
+                GOSUB   FINDLINE                ; ジャンプ先の行を検索
+                MOVEM   FINDLINER0,MAINW1       ; R0 : 見つかった行の先頭のアドレス
+                LINDR   FINDLINER0,MAINW0       ; W0 行の先頭は行番号
+                SINDR   MAINW0,VARSHARPP        ; 行番号を#にセット
+                INC     MAINW1                  ; W1　<- 次に実行するべきステートメントの正味の先頭
+                                                ; W1>=PROGLASTPでないことのチェックは先にするべきでは?
+                                                ; そうでないと、W0,W1に想定外の値がセットされてしまうのでは?
+                JCMP    MAINW1,PROGLASTP,MAINL10,MAIN1,MAIN1 ; 最後まで検索しても行が見つからなかった時は、プログラムの実行が終了と解釈。
 MAINW0          DS      1
 MAINW1          DS      1
 MAINW2          DS      1
@@ -250,20 +257,20 @@ NEXTLINEW0      DS      1
 ;
 SETLINE         GETLINE SETLINEBUFP,SETLINEBUFLEN
                 MOVEM   SETLINEBUFP,STR2NUMA0
-                GOSUB   STR2NUM
-SETLINEL05      JCMP    STR2NUMR1,SETLINEBUFP,SETLINEL99,SETLINEL99,SETLINEL10
-SETLINEL10      JCMP    STR2NUMR0,SETLINESTOPF,SETLINEL15,SETLINEHLT,SETLINEHLT
-SETLINEL15      LINDR   STR2NUMR1,SETLINECC
-                JCMP    SETLINECC,ZERO,SETLINEL30,SETLINEL30,SETLINEL20
-SETLINEL20      INC     STR2NUMR1  ; SKIP THE NEXT CHAR WHICH SHOULD BE SPACE.
+                GOSUB   STR2NUM                                                 ; 行の先頭が行番号であるかどうかの確認
+SETLINEL05      JCMP    STR2NUMR1,SETLINEBUFP,SETLINEL99,SETLINEL99,SETLINEL10  ; 行番号がなければ 式の先頭を持ってリターン
+SETLINEL10      JCMP    STR2NUMR0,SETLINESTOPF,SETLINEL15,SETLINEHLT,SETLINEHLT ; 行番号が99999ならばHALT
+SETLINEL15      LINDR   STR2NUMR1,SETLINECC                                     ; 行番号の次の文字をチェック
+                JCMP    SETLINECC,ZERO,SETLINEL30,SETLINEL30,SETLINEL20         ; 行が行番号だけならば、その行を削除->L30
+SETLINEL20      INC     STR2NUMR1  ; SKIP THE NEXT CHAR WHICH SHOULD BE SPACE.  ; 行番号の次の文字をノーチェックでスキップ
 SETLINEL30      MOVEM   STR2NUMR1,VTLSTMTA1
                 MOVEM   STR2NUMR0,VTLSTMTA0
-                GOSUB   VTLSTMT
-                JMP     SETLINEL98
-SETLINEL98      CLEARM  SETLINER0               ; SKIP TO NEXT INPUT.
+                GOSUB   VTLSTMT                                                 ; 行番号付き行をプログラム領域に書きこむ
+                JMP     SETLINEL98                                              ; 次に実行するべきステートメントはない。
+SETLINEL98      CLEARM  SETLINER0               ; SKIP TO NEXT INPUT.           ; ので戻り値は0
                 RETURN
-SETLINEL99      MOVEM   STR2NUMR1,SETLINER0     ; POINTER TO FORMULA TEXT.
-                RETURN
+SETLINEL99      MOVEM   STR2NUMR1,SETLINER0     ; POINTER TO FORMULA TEXT.      ; 次に実行するべきステートメントの先頭を
+                RETURN                                                          ; 戻り値にしてリターン
 SETLINEHLT      HALT
 SETLINESTOPF    DC      99999
 SETLINECC       DS      1
@@ -283,11 +290,11 @@ SETLINEOBUFLEN  DC      72
 ;               RETURN  : NONE
 ;
 ;
-VTLSTMT         JCMP    VTLSTMTA0,ZERO,LISTSTMT,LISTSTMT,VTLSTMTL10
-VTLSTMTL10      MOVEM   VTLSTMTA0,MAKEGAPA0
+VTLSTMT         JCMP    VTLSTMTA0,ZERO,LISTSTMT,LISTSTMT,VTLSTMTL10             ; 行番号が0のステートメントは、プログラムのリスト指示と解釈する。
+VTLSTMTL10      MOVEM   VTLSTMTA0,MAKEGAPA0                                     ; 該当行に対してのギャップを空ける。
                 GOSUB   MAKEGAP
-                JCMP    MAKEGAPR0,ZERO,VTLSTMTL99,VTLSTMTL99,VTLSTMTL12
-VTLSTMTL12      LINDR   VTLSTMTA1,VTLSTMTCC
+                JCMP    MAKEGAPR0,ZERO,VTLSTMTL99,VTLSTMTL99,VTLSTMTL12         ; ギャップが開けられなければ、何もせずリターンL99
+VTLSTMTL12      LINDR   VTLSTMTA1,VTLSTMTCC                                     
                 JCMP    VTLSTMTCC,VTLSTMTCR,VTLSTMTL60,VTLSTMTL60,VTLSTMTL20
 VTLSTMTL20      MOVEM   GAPTOP,VTLSTMTCS
                 SINDR   VTLSTMTA0,VTLSTMTCS

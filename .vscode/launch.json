@@ -14,7 +14,11 @@
         "--allow-file-access-from-files"
       ],
       "smartStep": true,
+<<<<<<< HEAD
       "url": "${workspaceFolder}/vtlide.html"
+=======
+      "url": "${workspaceFolder}/rssbide.html"
+>>>>>>> configuring-site-viewing
     },
     {
       "name": "Launch Chrome",
@@ -24,7 +28,11 @@
         "--allow-file-access-from-files"
       ],
       //"url": "http://localhost:3000",
+<<<<<<< HEAD
       "url": "${workspaceFolder}/vtlide.html"
+=======
+      "url": "${workspaceFolder}/rssbide.html"
+>>>>>>> configuring-site-viewing
     }
     ]
 }
