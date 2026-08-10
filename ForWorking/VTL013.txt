@@ -54,14 +54,14 @@ UDFMSGA         DC      UDFMSG
 UDFMSG          DC      'ABORT - STACK UNDERFLOW...\r\n\0'
 ;
 ;
-PUSHV0          JCMP    STKPTR,STACK,STKOVF,STKOVF,PUSHV0A
+PUSHV0          JCMP    STKPTR,STKBA,STKOVF,STKOVF,PUSHV0A
 PUSHV0A         PUSH    PSV0DA,STKPTR
                 JPIND   PSV0JA
 PSV0DA          DS      1
 PSV0JA          DS      1
 ;
 ;
-POPV0           JCMP    STKPTR,STKTOP,POPV0A,STKUDF,STKUDF
+POPV0           JCMP    STKPTR,STKTPA,POPV0A,STKUDF,STKUDF
 POPV0A          POP     POV0DA,STKPTR
                 JPIND   POV0JA
 POV0DA          DS      1
@@ -1077,6 +1077,7 @@ OKMSG           DC      'OK\r\n\0'
 OKMSGA          DC      OKMSG
 STKPTR          DS      1
 STKTPA          DC      STKTOP
+STKBA           DC      STACK
 STACK           DS      1024
 STKTOP          DS      1
 VTLVARIABLES    DS      65
