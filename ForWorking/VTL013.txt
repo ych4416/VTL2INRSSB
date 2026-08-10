@@ -120,6 +120,7 @@ SIDXR           DEFMACRO        SRC,BASE,OFFSET         ; (SRC)->((BASE+OFFSET))
 ;
 GETLN           MOVEM   GETLNA0,GETLNBS
                 MOVEM   GETLNA1,GETLNLM
+                ACCM    GETLNLM,GETLNM3
 GETLNZ          CLEARM  GETLNOF
                 JCMP    GETLNOF,GETLNLM,GETLN0,GETLN8,GETLN8
 GETLN0          GETCH   GETLNCC
@@ -169,6 +170,7 @@ GETLNUL         DC      '_'
 GETLNES         DC      27
 GETLNAT         DC      '@'
 GETLNNL         DC      '\r\n\0'
+GETLNM3         DC      -3
 GETLNNA         DC      GETLNNL
 ;
 ;
