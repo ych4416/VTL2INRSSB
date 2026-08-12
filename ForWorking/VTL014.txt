@@ -525,7 +525,6 @@ VTLEXECL110     POPV    VTLEXECRA
                 PUSHV   VTLEXECR0
                 PUSHV   VTLEXECRA
                 RETURN
-VTLEXECENIP     DS      1
 VTLEXECRA       DS      1
 VTLEXECA0       DS      1
 VTLEXECA1       DS      1
@@ -571,7 +570,6 @@ VTLEXECLOS40    PUSHV   VTLEXECLHP
                 GOSUB   NUM2STR
                 MOVEM   VTLEXECBUFP,PUTLINEA0
                 GOSUB   PUTLINE
-                DEC     VTLEXECCS
 VTLEXECLOS90    JMP     VTLEXECL99
 
                 
