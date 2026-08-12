@@ -634,26 +634,26 @@ VTLVTERMNV      DC      63   ; NUMBER OF VALID VARS
 ;                             2ND OF STACK - STRING TO PARSE NEXT
 ;
 ;
-VTLEVAL         POP     VTLEVALRA,STKPTR
-                POP     VTLEVALA0,STKPTR
-                PUSH    VTLEVALRA,STKPTR
+VTLEVAL         POPV    VTLEVALRA
+                POPV    VTLEVALA0
+                PUSHV   VTLEVALRA
                 MOVEM   ZERO,VTLEVALT0
                 MOVEM   VTLEVALPLUS,VTLEVALOP
                 MOVEM   ZERO,VTLEVALT1
                 MOVEM   VTLEVALA0,VTLEVALCS
 ;
-VTLEVALL10      PUSH    VTLEVALT0,STKPTR
-                PUSH    VTLEVALOP,STKPTR
+VTLEVALL10      PUSHV   VTLEVALT0
+                PUSHV   VTLEVALOP
                 ;
-                PUSH    VTLEVALCS,STKPTR
+                PUSHV   VTLEVALCS
                 GOSUB   GETTOKEN                ; GET T1
-                POP     VTLEVALCS,STKPTR
-                POP     VTLEVALVL,STKPTR
-                POP     VTLEVALCC,STKPTR
-                POP     VTLEVALLC,STKPTR
+                POPV    VTLEVALCS
+                POPV    VTLEVALVL
+                POPV    VTLEVALCC
+                POPV    VTLEVALLC
                 ;
-                POP     VTLEVALOP,STKPTR
-                POP     VTLEVALT0,STKPTR
+                POPV    VTLEVALOP
+                POPV    VTLEVALT0
                 JCMP    VTLEVALVL,ZERO,VTLEVALL90,VTLEVALL25,VTLEVALL25
 VTLEVALL25      JCMP    VTLEVALCC,VTLEVALQS,VTLEVALL27,VTLEVALLIN,VTLEVALL27
 VTLEVALL27      JCMP    VTLEVALCC,VTLEVALDR,VTLEVALL28,VTLEVALLGETC,VTLEVALL28
