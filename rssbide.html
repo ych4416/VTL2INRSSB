@@ -1310,8 +1310,13 @@
         return Pass4_Emit(errorFunc);
     }
 
-    function InitialLoad() {
-        var initialscript = "./init.txt";
+    var outloadspec = null;
+    var startBatch = null;
+
+    function InitialLoad(fname) {
+        var outloadfname = "./init.txt";
+        if(fname !== null && fname !== undefined)
+            outloadfname = fname;
         var request = new XMLHttpRequest();
         request.addEventListener("load", function (e) {
             var _initialscriptstring = request.responseText;
@@ -1322,8 +1327,8 @@
                 $("#outload").val(_initialscriptstring);
                 storage = JSON.parse($("#outload").val());
                 ResetMenu();
-                SwitchFile(storage.bootStrap);
-                ExcBatch();
+                SwitchFile(startBatch);
+                ExcBatch(startBatch);
             }
         });
         request.addEventListener("error", function (e) {
@@ -1332,11 +1337,14 @@
         request.addEventListener("abort", function (e) {
             window.alert("abort")
         });
-        request.open("GET", initialscript);
+        request.open("GET", outloadfname);
         request.send();
     }
-    function ExcBatch() {
-        if (storage.files["INIT.BAT"] !== undefined && storage.files["INIT.BAT"] !== null) {
+    function ExcBatch(bname) {
+        var batchfilename = "INIT.BAT";
+        if(bname !== null && bname !== undefined)
+            batchfilename = bname;
+        if (storage.files[bname] !== undefined && storage.files[bname] !== null) {
             buffer += (function (s) {
                 result = "";
                 var lines = s.split("\n");
@@ -1344,12 +1352,24 @@
                     if (lines[i] !== '') result += lines[i] + "\r";
                 }
                 return result;
-            }(storage.files["INIT.BAT"]));
+            }(storage.files[bname]));
         };
     }
 
     (function () {
-        InitialLoad();
+        
+    var urlarg = new Object;
+    var urloption = location.search.substring(1);
+    if (urloption !== "") {
+            var pair = urloption.split('&');
+            for(var i=0; pair[i]; i++){
+                var keyandval = pair[i].split('=');
+                urlarg[keyandval[0]] = keyandval[1];
+            }
+            if(urlarg['i'] !== undefined ) outloadspec = urlarg['i'];
+            if(urlarg['b'] !== undefined ) startBatch = urlarg['b'];
+        }
+        InitialLoad(outloadspec);
     })()
 </script>
 <script>

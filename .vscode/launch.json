@@ -14,11 +14,8 @@
         "--allow-file-access-from-files"
       ],
       "smartStep": true,
-<<<<<<< HEAD
-      "url": "${workspaceFolder}/vtlide.html"
-=======
-      "url": "${workspaceFolder}/rssbide.html"
->>>>>>> configuring-site-viewing
+      // "url": "${workspaceFolder}/rssbide.html?outload=init07.txt&startbatch=INIT.BAT"
+      "url": "${workspaceFolder}/rssbide.html?i=init.txt&b=INIT.BAT"
     },
     {
       "name": "Launch Chrome",
@@ -28,11 +25,7 @@
         "--allow-file-access-from-files"
       ],
       //"url": "http://localhost:3000",
-<<<<<<< HEAD
-      "url": "${workspaceFolder}/vtlide.html"
-=======
-      "url": "${workspaceFolder}/rssbide.html"
->>>>>>> configuring-site-viewing
+      "url": "${workspaceFolder}/rssbide.html?i=init.txt&b=INIT.BAT"
     }
     ]
 }
