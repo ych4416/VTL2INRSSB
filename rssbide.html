@@ -1362,7 +1362,7 @@
         var batchfilename = "INIT.BAT";
         if(bname !== null && bname !== undefined)
             batchfilename = bname;
-        if (storage.files[bname] !== undefined && storage.files[bname] !== null) {
+        if (storage.files[batchfilename] !== undefined && storage.files[batchfilename] !== null) {
             buffer += (function (s) {
                 result = "";
                 var lines = s.split("\n");
@@ -1370,7 +1370,7 @@
                     if (lines[i] !== '') result += lines[i] + "\r";
                 }
                 return result;
-            }(storage.files[bname]));
+            }(storage.files[batchfilename]));
         };
     }
 
