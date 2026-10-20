@@ -335,14 +335,15 @@
     //
         var monitorGrammer = ' \n\
    cmd = quitcmd / asmcmd / runcmd / dbgcmd / exmcmd \n\
-   asmcmd = "asm" eol { return AsmCommand; }\n\
-   runcmd = "run" eol { return RunCommand; }\n\
+   asmcmd = "asm" eol { return async function(){await AsmCommand(null)}; } / "asm" dlims src:fname eol { return async function(){await AsmCommand(src)}; }\n\
+   runcmd = "run" eol { return async function(){await RunCommand(null)}; } / "run" dlims bin:fname eol { return async function(){await RunCommand(bin)}; }\n\
    dbgcmd = "dbg" eol { return DebugCommand; }\n\
    exmcmd = "exm" dlims parm:$([0-9,])* eol {return async function() { await Examine(parm);}}\n\
    quitcmd = "quit" eol {window.alert("OK to quit"); return function(){}; }\n\
    dlim = $[ ,\t] \n\
    dlims = $[ ,\t]+ \n\
    eol = $("\\r\\n") / $("\\n") / $("\\r") \n\
+   fname = val:$([a-zA-Z0-9.]+) {return FlattenString(val);} \n\
    ';
     var terminalUI = new TerminalUI();
     try {
@@ -375,18 +376,35 @@
         term.writeln("BYE...");
     })();
     
-    async function AsmCommand() { 
+    async function AsmCommand(fname) { 
         var text = editor.getValue();
+        if(fname !== null && fname !== undefined && fname !== "") {
+            if(storage.files[fname] === undefined || storage.files[fname] < 0) {
+                terminalUI.writeln("File not found: "+fname);
+                return new Promise((resolve, reject) => { resolve(0); });
+            }
+            text = storage.files[fname];
+        }
         var objcode = Assemble(text, function (s) { terminalUI.writeln(s) });
         if(typeof(objcode) ==="string") {
             storage.files['a.out'] = objcode;
             ResetMenu();
         }
+        return new Promise((resolve, reject) => { resolve(0); });
     };
-    async function RunCommand() {
-        if (Loader(storage.files['a.out']) > 0)
+    async function RunCommand(bname) {
+        var binary = 'a.out';
+        if(bname !== null && bname !== undefined && bname !== "") {
+            if(storage.files[bname] === undefined || storage.files[bname] < 0) {
+                terminalUI.writeln("File not found: "+bname);
+                return;
+            }
+            binary = bname;
+        }
+        if (Loader(storage.files[binary]) > 0)
             await RSSB(mem, 5, function (addr) { return true; }, async function () { return await terminalUI.getch(false); }, async function (s) { await terminalUI.putchars(s); });
         terminalUI.writeln("Rssb Halted..\r\nReady.");
+        return new Promise((resolve, reject) => { resolve(0); });
     };
     async function DebugCommand() {
         if(Loader(storage.files['a.out']) > 0) {
