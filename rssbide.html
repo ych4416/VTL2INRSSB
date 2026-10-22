@@ -87,14 +87,11 @@
         </ul>
         <!-- div id="tabs-2dgraphics"><svg id="svg2dgraphic"></svg></div -->
         <div id="tabs-main"><h1>CONSOLE</h1>
-            <div align="left">
-                <input type="checkbox" title="LOGGING" id="main-outtee" value="LOGGING" />
-                LOGGING
-            </div>
-            <div align="right">
-                <input type="button" id="main-batch" value="BATCH"/>
+            <div style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;">
+                <div><input type="checkbox" id="main-outtee" value="LOGGING"/>LOGGING</div>
                 <input type="button" id="main-esc" value="ESC"/>
-            </div><br><div id="terminal"></div></div>
+            </div>
+        <br><div id="terminal"></div></div>
         <div id="tabs-editor">
             <h1>EDITOR</h1>
             <div>
@@ -225,18 +222,17 @@
         buffer = buffer + data;
     });
     $("#main-esc")[0].addEventListener('click',(e)=>{buffer+='\x1b'});
-    $("#main-batch")[0].addEventListener('click',(e)=>{ExcBatch()});
     $("#main-outtee")[0].addEventListener('change',(e)=>{
             if(e.target.checked) { 
                 if(storage.files["stdout.txt"] === undefined || storage.files["stdout.txt"] === null){
                     storage.files["stdout.txt"] = "";
                     ResetMenu();
                 }
-                terminalUI.log = storage.files["stdout.txt"];
+                terminalUI.log = true;
             } else {
-                storage.files["stdout.txt"]+=terminalUI.log;
+                //storage.files["stdout.txt"]+=terminalUI.log;
                 storage.files["stdout.txt"]+="\r\n----\r\n";
-                terminalUI.log = null;
+                terminalUI.log = false;
             }
     })
     class TerminalUI {
@@ -283,7 +279,7 @@
         write(s) { this.tee(s); term.write(s); }
         reset() { term.reset(); };
 
-        tee(c) { if(this.log !== null) this.log+=c;}
+        tee(c) { if(this.log === true) storage.files["stdout.txt"]+=c;}
     }
 </script>
 <script>
@@ -1363,14 +1359,14 @@
         if(bname !== null && bname !== undefined)
             batchfilename = bname;
         if (storage.files[batchfilename] !== undefined && storage.files[batchfilename] !== null) {
-            buffer += (function (s) {
+            buffer = (function (s) {
                 result = "";
                 var lines = s.split("\n");
                 for (var i = 0; i < lines.length; i++) {
                     if (lines[i] !== '') result += lines[i] + "\r";
                 }
                 return result;
-            }(storage.files[batchfilename]));
+            }(storage.files[batchfilename])) + buffer;
         };
     }
 
